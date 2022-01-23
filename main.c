@@ -20,9 +20,8 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		goto fail;
 	}
 	winx_print("ZenWINX keyboard init OK.\n");
-	winx_print("Press any key ...\n");
-	winx_kbhit(INFINITE);
-	naoh_shell(Peb);
+	naoh_cmd_init();
+	naoh_shell();
 fail:
 	winx_exit(0);
 }

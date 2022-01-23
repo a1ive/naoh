@@ -90,6 +90,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="case-tables.h" />
+    <ClInclude Include="charset.h" />
     <ClInclude Include="commands.h" />
     <ClInclude Include="dbg.h" />
     <ClInclude Include="ntfs.h" />

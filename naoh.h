@@ -5,6 +5,7 @@
 #include "ZenWINX/zenwinx.h"
 #include "ZenWINX/commands.h"
 
-void naoh_shell(PEB* peb);
+void naoh_shell(void);
+void naoh_cmd_init(void);
 
-#endif /* _DEFRAG_NATIVE_H_ */
+#endif

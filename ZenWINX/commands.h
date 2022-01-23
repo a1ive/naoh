@@ -22,16 +22,29 @@
 #define MAX_ENV_VARIABLE_LENGTH 32766
 #define MAX_LONG_PATH MAX_ENV_VARIABLE_LENGTH /* must be equal */
 
-typedef struct _object_path
+typedef int(*winx_command_func_t) (int argc, char** argv);
+
+struct winx_command
 {
-	struct _object_path* next;
-	struct _object_path* prev;
-	wchar_t path[MAX_LONG_PATH + 1];
-	int processed;
-} object_path;
+	struct winx_command* next;
+	struct winx_command** prev;
+	const char* name;
+	winx_command_func_t func;
+	const char* help;
+};
+typedef struct winx_command* winx_command_t;
 
-int winx_parse_command(winx_history* history, wchar_t* cmdline, PEB* peb);
+extern winx_command_t winx_command_list;
 
-int winx_process_script(winx_history* history, wchar_t* filename, PEB* peb);
+void
+winx_command_register(winx_command_t cmd);
+
+winx_command_t
+winx_command_find(const char* name);
+
+int
+winx_command_execute(const char* name, int argc, char** argv);
+
+int winx_command_parse(char* cmdline);
 
 #endif

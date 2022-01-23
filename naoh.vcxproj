@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="cmd.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="shell.c" />
   </ItemGroup>
