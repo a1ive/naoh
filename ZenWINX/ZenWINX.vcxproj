@@ -90,6 +90,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="case-tables.h" />
+    <ClInclude Include="commands.h" />
     <ClInclude Include="dbg.h" />
     <ClInclude Include="ntfs.h" />
     <ClInclude Include="ntndk.h" />
@@ -99,6 +100,7 @@
     <ClInclude Include="zenwinx.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="commands.c" />
     <ClCompile Include="dbg.c" />
     <ClCompile Include="entry.c" />
     <ClCompile Include="env.c" />
@@ -120,6 +122,7 @@
     <ClCompile Include="prec.c" />
     <ClCompile Include="privilege.c" />
     <ClCompile Include="reg.c" />
+    <ClCompile Include="script.c" />
     <ClCompile Include="stdio.c" />
     <ClCompile Include="string.c" />
     <ClCompile Include="thread.c" />

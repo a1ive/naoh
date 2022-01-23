@@ -39,6 +39,9 @@
     <ClInclude Include="zenwinx.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="commands.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dbg.c">
@@ -120,6 +123,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="zenwinx.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="commands.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="script.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
