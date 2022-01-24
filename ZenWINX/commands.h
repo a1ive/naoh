@@ -8,13 +8,10 @@
 
    /* define how many characters may be
 	  printed on a line after the prompt */
-#define MAX_LINE_WIDTH 70
+#define MAX_LINE_WIDTH 256
 
 	  /* message to terminate the volume processing */
 #define BREAK_MESSAGE "Use Pause/Break key to abort the process early.\n\n"
-
-/* define whether @echo is on by default or not */
-#define DEFAULT_ECHO_FLAG 1
 
 /* message to be shown when the pause command is used without parameters */
 #define PAUSE_MESSAGE "Hit any key to continue..."
@@ -46,5 +43,7 @@ int
 winx_command_execute(const char* name, int argc, char** argv);
 
 int winx_command_parse(char* cmdline);
+
+void winx_execute_native(const wchar_t* file, const wchar_t* cmdline);
 
 #endif

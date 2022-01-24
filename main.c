@@ -14,7 +14,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		winx_print("SafeMode detected!\n");
 		goto fail;
 	}
-	if (winx_kb_init() < 0)
+	if (winx_kb_open() < 0)
 	{
 		winx_print("ZenWINX keyboard init failed!\n");
 		goto fail;
@@ -23,5 +23,6 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	naoh_cmd_init();
 	naoh_shell();
 fail:
+	winx_kb_close();
 	winx_exit(0);
 }

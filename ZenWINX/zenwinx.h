@@ -233,6 +233,8 @@ void winx_defrag_fclose(HANDLE h);
 /* int64.c */
 /* keyboard.c */
 int winx_kb_init(void);
+int winx_kb_open(void);
+void winx_kb_close(void);
 
 /* keytrans.c */
 /* ldr.c */

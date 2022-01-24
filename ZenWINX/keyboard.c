@@ -71,7 +71,7 @@ int kb_read_time_elapsed = 0;
 
 /* prototypes */
 char *winx_get_status_description(unsigned long status);
-void kb_close(void);
+void winx_kb_close(void);
 
 /*
 **************************************************************
@@ -331,7 +331,7 @@ static int kb_open_device(int device_number)
  * @brief Opens all the initialized keyboards.
  * @return Zero for success, a negative value otherwise.
  */
-static int kb_open(void)
+int winx_kb_open(void)
 {
     wchar_t event_name[64];
     int i;
@@ -363,7 +363,7 @@ static int kb_open(void)
                 "input from \\Device\\KeyboardClass%u\n\n",
                 kb[i].device_number);
             /* stop all threads */
-            kb_close();
+            winx_kb_close();
             return (-1);
         }
     }
@@ -376,7 +376,7 @@ static int kb_open(void)
  * @internal
  * @brief Closes all the opened keyboards.
  */
-void kb_close(void)
+void winx_kb_close(void)
 {
     int i;
     
@@ -426,7 +426,7 @@ int winx_kb_init(void)
     * Open all PS/2 keyboards - 
     * they're ready immediately.
     */
-    (void)kb_open();
+    (void)winx_kb_open();
     
     /*
     * Give USB keyboards time
@@ -448,8 +448,8 @@ int winx_kb_init(void)
     * Reset keyboard queues; open 
     * all the connected keyboards.
     */
-    kb_close();
-    return kb_open();
+    winx_kb_close();
+    return winx_kb_open();
 }
 
 /**

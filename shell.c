@@ -12,5 +12,4 @@ void naoh_shell(void)
 		winx_command_parse(buffer);
 	}
 	winx_destroy_history(&history);
-	winx_exit(0);
 }

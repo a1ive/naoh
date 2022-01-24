@@ -134,5 +134,8 @@
     <ClCompile Include="script.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="process.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -34,7 +34,7 @@ int winx_dbg_init(void);
 void winx_dbg_close(void);
 void mark_windows_boot_as_successful(void);
 char *winx_get_status_description(unsigned long status);
-void kb_close(void);
+void winx_kb_close(void);
 
 /**
  * @brief Initializes zenwinx library.
@@ -96,7 +96,7 @@ void winx_exit(int exit_code)
 {
     NTSTATUS Status;
     
-    kb_close();
+    winx_kb_close();
     winx_flush_dbg_log(0);
     Status = NtTerminateProcess(NtCurrentProcess(),exit_code);
     if(!NT_SUCCESS(Status)){
@@ -114,7 +114,7 @@ void winx_reboot(void)
 {
     NTSTATUS Status;
     
-    kb_close();
+    winx_kb_close();
     mark_windows_boot_as_successful();
     (void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
     winx_flush_dbg_log(0);
@@ -134,7 +134,7 @@ void winx_shutdown(void)
 {
     NTSTATUS Status;
     
-    kb_close();
+    winx_kb_close();
     mark_windows_boot_as_successful();
     (void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
     winx_flush_dbg_log(0);

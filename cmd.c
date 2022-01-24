@@ -100,6 +100,7 @@ static struct winx_command cmd_shutdown =
 	.help = "shutdown\nShut the computer down.",
 };
 
+/* ls */
 static int ls_filter(winx_file_info* f, void* data)
 {
 	return 0;
@@ -118,7 +119,6 @@ static int ls_terminator(void* data)
 	return 0;
 }
 
-/* ls */
 static int cmd_ls_func(int argc, char** argv)
 {
 	wchar_t* path;
@@ -162,6 +162,58 @@ static struct winx_command cmd_ls =
 	.help = "ls PATH\nList files.",
 };
 
+/* call */
+static int cmd_call_func(int argc, char** argv)
+{
+	char* script = NULL;
+	if (argc > 1)
+		script = argv[1];
+	return naoh_script(script);
+}
+
+static struct winx_command cmd_call =
+{
+	.next = 0,
+	.name = "call",
+	.func = cmd_call_func,
+	.help = "call [SCRIPT]\nExecute a boot time script.",
+};
+
+/* exec */
+static int cmd_exec_func(int argc, char** argv)
+{
+	int i;
+	wchar_t* file = NULL;
+	wchar_t* cmdline = NULL;
+	if (argc < 2)
+		return 0;
+	file = winx_swprintf(L"\\??\\%S", argv[1]);
+	for (i = 1; i < argc; i++)
+	{
+		wchar_t* tmp = NULL;
+		if (cmdline)
+		{
+			tmp = winx_swprintf(L"%s %S", cmdline, argv[i]);
+			winx_free(cmdline);
+		}
+		else
+			tmp = winx_swprintf(L"%S", argv[i]);
+		cmdline = tmp;
+	}
+	winx_printf("cmdline: %S\n", cmdline);
+	winx_execute_native(file, cmdline);
+	winx_free(cmdline);
+	return 0;
+}
+
+static struct winx_command cmd_exec =
+{
+	.next = 0,
+	.name = "exec",
+	.func = cmd_exec_func,
+	.help = "exec FILE [CMDLINE] ...\nExecute a native program.",
+};
+
 void
 naoh_cmd_init(void)
 {
@@ -170,5 +222,7 @@ naoh_cmd_init(void)
 	winx_command_register(&cmd_exit);
 	winx_command_register(&cmd_ls);
 	winx_command_register(&cmd_echo);
+	winx_command_register(&cmd_exec);
+	winx_command_register(&cmd_call);
 	winx_command_register(&cmd_help);
 }

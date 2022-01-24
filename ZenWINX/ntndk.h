@@ -393,6 +393,173 @@ typedef struct _RTL_USER_PROCESS_PARAMETERS {
     RTL_DRIVE_LETTER_CURDIR DLCurrentDirectory[0x20];
 } RTL_USER_PROCESS_PARAMETERS, *PRTL_USER_PROCESS_PARAMETERS;
 
+typedef struct _SECTION_BASIC_INFORMATION
+{
+    PVOID           BaseAddress;
+    ULONG           Attributes;
+    LARGE_INTEGER   Size;
+} SECTION_BASIC_INFORMATION, * PSECTION_BASIC_INFORMATION;
+
+typedef struct _SECTION_IMAGE_INFORMATION
+{
+    PVOID TransferAddress;
+    ULONG ZeroBits;
+    SIZE_T MaximumStackSize;
+    SIZE_T CommittedStackSize;
+    ULONG SubSystemType;
+    union
+    {
+        struct
+        {
+            USHORT SubSystemMinorVersion;
+            USHORT SubSystemMajorVersion;
+        };
+        ULONG SubSystemVersion;
+    };
+    ULONG GpValue;
+    USHORT ImageCharacteristics;
+    USHORT DllCharacteristics;
+    USHORT Machine;
+    BOOLEAN ImageContainsCode;
+#if (NTDDI_VERSION >= NTDDI_LONGHORN)
+    union
+    {
+        struct
+        {
+            UCHAR ComPlusNativeReady : 1;
+            UCHAR ComPlusILOnly : 1;
+            UCHAR ImageDynamicallyRelocated : 1;
+            UCHAR ImageMappedFlat : 1;
+            UCHAR Reserved : 4;
+        };
+        UCHAR ImageFlags;
+    };
+#else
+    BOOLEAN Spare1;
+#endif
+    ULONG LoaderFlags;
+    ULONG ImageFileSize;
+#if (NTDDI_VERSION >= NTDDI_LONGHORN)
+    ULONG CheckSum;
+#else
+    ULONG Reserved[1];
+#endif
+} SECTION_IMAGE_INFORMATION, * PSECTION_IMAGE_INFORMATION;
+
+typedef struct _CLIENT_ID
+{
+    HANDLE UniqueProcess;
+    HANDLE UniqueThread;
+} CLIENT_ID, * PCLIENT_ID;
+
+typedef struct _RTL_USER_PROCESS_INFORMATION
+{
+    ULONG Size;
+    HANDLE ProcessHandle;
+    HANDLE ThreadHandle;
+    CLIENT_ID ClientId;
+    SECTION_IMAGE_INFORMATION ImageInformation;
+} RTL_USER_PROCESS_INFORMATION, * PRTL_USER_PROCESS_INFORMATION;
+
+typedef struct _KSYSTEM_TIME
+{
+    ULONG LowPart;
+    LONG High1Time;
+    LONG High2Time;
+} KSYSTEM_TIME, * PKSYSTEM_TIME;
+
+typedef enum _NT_PRODUCT_TYPE
+{
+    NtProductWinNt = 1,
+    NtProductLanManNt,
+    NtProductServer
+} NT_PRODUCT_TYPE, * PNT_PRODUCT_TYPE;
+
+typedef enum _ALTERNATIVE_ARCHITECTURE_TYPE
+{
+    StandardDesign,
+    NEC98x86,
+    EndAlternatives
+} ALTERNATIVE_ARCHITECTURE_TYPE;
+
+#define MAX_WOW64_SHARED_ENTRIES        16
+
+#define PROCESSOR_FEATURE_MAX           64
+
+typedef struct _KUSER_SHARED_DATA
+{
+    ULONG TickCountLowDeprecated;
+    ULONG TickCountMultiplier;
+    volatile KSYSTEM_TIME InterruptTime;
+    volatile KSYSTEM_TIME SystemTime;
+    volatile KSYSTEM_TIME TimeZoneBias;
+    USHORT ImageNumberLow;
+    USHORT ImageNumberHigh;
+    WCHAR NtSystemRoot[260];
+    ULONG MaxStackTraceDepth;
+    ULONG CryptoExponent;
+    ULONG TimeZoneId;
+    ULONG LargePageMinimum;
+    ULONG Reserved2[7];
+    NT_PRODUCT_TYPE NtProductType;
+    BOOLEAN ProductTypeIsValid;
+    ULONG NtMajorVersion;
+    ULONG NtMinorVersion;
+    BOOLEAN ProcessorFeatures[PROCESSOR_FEATURE_MAX];
+    ULONG Reserved1;
+    ULONG Reserved3;
+    volatile ULONG TimeSlip;
+    ALTERNATIVE_ARCHITECTURE_TYPE AlternativeArchitecture;
+    LARGE_INTEGER SystemExpirationDate;
+    ULONG SuiteMask;
+    BOOLEAN KdDebuggerEnabled;
+#if (NTDDI_VERSION >= NTDDI_WINXPSP2)
+    UCHAR NXSupportPolicy;
+#endif
+    volatile ULONG ActiveConsoleId;
+    volatile ULONG DismountCount;
+    ULONG ComPlusPackage;
+    ULONG LastSystemRITEventTickCount;
+    ULONG NumberOfPhysicalPages;
+    BOOLEAN SafeBootMode;
+    ULONG TraceLogging;
+    ULONG Fill0;
+    ULONGLONG TestRetInstruction;
+    ULONG SystemCall;
+    ULONG SystemCallReturn;
+    ULONGLONG SystemCallPad[3];
+    union {
+        volatile KSYSTEM_TIME TickCount;
+        volatile ULONG64 TickCountQuad;
+    };
+    ULONG Cookie;
+#if (NTDDI_VERSION >= NTDDI_WS03)
+    LONGLONG ConsoleSessionForegroundProcessId;
+    ULONG Wow64SharedInformation[MAX_WOW64_SHARED_ENTRIES];
+#endif
+#if (NTDDI_VERSION >= NTDDI_LONGHORN)
+    USHORT UserModeGlobalLogger[8];
+    ULONG HeapTracingPid[2];
+    ULONG CritSecTracingPid[2];
+    union
+    {
+        ULONG SharedDataFlags;
+        struct
+        {
+            ULONG DbgErrorPortPresent : 1;
+            ULONG DbgElevationEnabled : 1;
+            ULONG DbgVirtEnabled : 1;
+            ULONG DbgInstallerDetectEnabled : 1;
+            ULONG SpareBits : 28;
+        };
+    };
+    ULONG ImageFileExecutionOptions;
+    KAFFINITY ActiveProcessorAffinity;
+#endif
+} KUSER_SHARED_DATA, * PKUSER_SHARED_DATA;
+
+#define USER_SHARED_DATA 0x7FFE0000
+
 typedef struct tagRTL_BITMAP {
     ULONG  SizeOfBitMap; /* Number of bits in the bitmap */
     PULONG Buffer; /* Bitmap data, assumed sized to a DWORD boundary */
@@ -406,11 +573,6 @@ typedef struct _PEB_LDR_DATA {
     LIST_ENTRY          InMemoryOrderModuleList;
     LIST_ENTRY          InInitializationOrderModuleList;
 } PEB_LDR_DATA, *PPEB_LDR_DATA;
-
-typedef struct _CLIENT_ID {
-    HANDLE UniqueProcess;
-    HANDLE UniqueThread;
-} CLIENT_ID, *PCLIENT_ID;
 
 typedef struct _GDI_TEB_BATCH {
     ULONG  Offset;
@@ -1299,6 +1461,8 @@ NTSTATUS    NTAPI    NtQueryValueKey(HANDLE,PUNICODE_STRING,KEY_VALUE_INFORMATIO
 NTSTATUS    NTAPI    NtQueryVolumeInformationFile(HANDLE,PIO_STATUS_BLOCK,PVOID,SIZE_T,FS_INFORMATION_CLASS);
 NTSTATUS    NTAPI    NtReadFile(HANDLE,HANDLE,PIO_APC_ROUTINE,PVOID,PIO_STATUS_BLOCK,PVOID,SIZE_T,PLARGE_INTEGER,PULONG);
 NTSTATUS    NTAPI    NtReleaseMutant(PHANDLE,SIZE_T *);
+NTSTATUS    NTAPI    NtResumeProcess(HANDLE ProcessHandle);
+NTSTATUS    NTAPI    NtResumeThread(HANDLE ThreadHandle,PULONG SuspendCount);
 NTSTATUS    NTAPI    NtSetEvent(HANDLE,PULONG);
 NTSTATUS    NTAPI    NtSetInformationProcess(HANDLE,PROCESS_INFORMATION_CLASS,PVOID,SIZE_T);
 NTSTATUS    NTAPI    NtSetSystemPowerState(POWER_ACTION SystemAction,SYSTEM_POWER_STATE MinSystemState,SIZE_T Flags);
@@ -1314,7 +1478,17 @@ NTSTATUS    NTAPI    RtlAdjustPrivilege(SIZE_T Id,SIZE_T Enable,SIZE_T ForCurren
 PVOID       NTAPI    RtlAllocateHeap(HANDLE,SIZE_T,SIZE_T);
 NTSTATUS    NTAPI    RtlAnsiStringToUnicodeString(PUNICODE_STRING,PANSI_STRING,SIZE_T);
 HANDLE      NTAPI    RtlCreateHeap(SIZE_T,PVOID,SIZE_T,SIZE_T,PVOID,PRTL_HEAP_DEFINITION);
+NTSTATUS    NTAPI    RtlCreateProcessParameters(PRTL_USER_PROCESS_PARAMETERS* ProcessParameters,PUNICODE_STRING ImagePathName,PUNICODE_STRING DllPath,PUNICODE_STRING CurrentDirectory,PUNICODE_STRING CommandLine,PWSTR Environment,PUNICODE_STRING WindowTitle,PUNICODE_STRING DesktopInfo,PUNICODE_STRING ShellInfo,PUNICODE_STRING RuntimeInfo);
 BOOLEAN     NTAPI    RtlCreateUnicodeString(PUNICODE_STRING,LPCWSTR);
+NTSTATUS    NTAPI    RtlCreateUserProcess(PUNICODE_STRING ImageFileName, ULONG Attributes,
+    PRTL_USER_PROCESS_PARAMETERS ProcessParameters,
+    PSECURITY_DESCRIPTOR ProcessSecutityDescriptor,
+    PSECURITY_DESCRIPTOR ThreadSecurityDescriptor,
+    HANDLE ParentProcess,
+    BOOLEAN CurrentDirectory,
+    HANDLE DebugPort,
+    HANDLE ExceptionPort,
+    PRTL_USER_PROCESS_INFORMATION ProcessInfo);
 NTSTATUS    NTAPI    RtlCreateUserThread(HANDLE,PSECURITY_DESCRIPTOR,SIZE_T,SIZE_T,SIZE_T,SIZE_T,PTHREAD_START_ROUTINE,PVOID,PHANDLE,PCLIENT_ID);
 HANDLE      NTAPI    RtlDestroyHeap(HANDLE);
 BOOLEAN     NTAPI    RtlDosPathNameToNtPathName_U(PCWSTR,PUNICODE_STRING,PCWSTR*,CURDIR*);

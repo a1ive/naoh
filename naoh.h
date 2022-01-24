@@ -7,6 +7,7 @@
 #include "ZenWINX/charset.h"
 
 void naoh_shell(void);
+int naoh_script(const char* filename);
 void naoh_cmd_init(void);
 
 #endif
