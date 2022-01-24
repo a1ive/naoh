@@ -2,7 +2,6 @@
 #include "prec.h"
 #include "zenwinx.h"
 #include "commands.h"
-#include "charset.h"
 
 winx_command_t winx_command_list;
 
@@ -46,7 +45,7 @@ static char* expand_environment_variables(char* cmd)
 	ULONG number_of_bytes;
 	NTSTATUS status;
 	wchar_t* cmd16;
-	size_t len, len16, length;
+	size_t length;
 	
 	if(cmd == NULL)
 		return NULL;
@@ -72,11 +71,7 @@ static char* expand_environment_variables(char* cmd)
 	}
 
 	/* utf-8 -> ucs2 */
-	len = strlen(cmd);
-	len16 = len * WINX_MAX_UTF16_PER_UTF8;
-	cmd16 = winx_malloc((1ULL + len16) * sizeof(wchar_t));
-	len16 = winx_utf8_to_utf16(cmd16, len16, (const uint8_t*)cmd, len, NULL);
-	cmd16[len16] = 0;
+	cmd16 = winx_swprintf(L"%S", cmd);
 	/* expand environment variables */
 	RtlInitUnicodeString(&in,cmd16);
 	out.Length = out.MaximumLength = 0;
@@ -120,9 +115,7 @@ static char* expand_environment_variables(char* cmd)
 	/* ucs2 -> utf-8*/
 	if (expanded_string)
 	{
-		len16 = wcslen(expanded_string);
-		ret = winx_malloc((1ULL + len16) * WINX_MAX_UTF8_PER_UTF16);
-		*winx_utf16_to_utf8((uint8_t*)ret, expanded_string, len16 + 1) = '\0';
+		ret = winx_sprintf("%S", expanded_string);
 		winx_free(expanded_string);
 	}
 	winx_free(cmd16);

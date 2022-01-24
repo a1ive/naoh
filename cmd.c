@@ -100,12 +100,75 @@ static struct winx_command cmd_shutdown =
 	.help = "shutdown\nShut the computer down.",
 };
 
+static int ls_filter(winx_file_info* f, void* data)
+{
+	return 0;
+}
+
+static void ls_progress(winx_file_info* f, void* data)
+{
+	if (is_directory(f))
+		winx_printf(" [%S]", f->name);
+	else
+		winx_printf(" %S", f->name);
+}
+
+static int ls_terminator(void* data)
+{
+	return 0;
+}
+
+/* ls */
+static int cmd_ls_func(int argc, char** argv)
+{
+	wchar_t* path;
+	winx_file_info* list;
+
+	if (argc < 2)
+	{
+		char vol;
+		char vol_size[16];
+		winx_volume_information info;
+		for (vol = 'A'; vol <= 'Z'; vol++)
+		{
+			if (winx_get_volume_information(vol, &info))
+				continue;
+			if (winx_bytes_to_hr(info.total_bytes, 2, vol_size, sizeof(vol_size)) <= 0)
+				memcpy(vol_size, "UNKNOWN", sizeof("UNKNOWN"));
+			winx_printf("%c:\\ LABEL=[%S] FS=%s SIZE=%s\n", vol, info.label, info.fs_name, vol_size);
+		}
+		return 0;
+	}
+	path = winx_swprintf(L"\\??\\%S", argv[1]);
+	if (!path)
+	{
+		winx_printf("error invalid path\n");
+		return (-1);
+	}
+
+	list = winx_ftw(path, 0, ls_filter, ls_progress, ls_terminator, NULL);
+	winx_printf("\n");
+	winx_ftw_release(list);
+	winx_free(path);
+	
+	return 0;
+}
+
+static struct winx_command cmd_ls =
+{
+	.next = 0,
+	.name = "ls",
+	.func = cmd_ls_func,
+	.help = "ls PATH\nList files.",
+};
+
 void
 naoh_cmd_init(void)
 {
 	winx_command_register(&cmd_shutdown);
 	winx_command_register(&cmd_reboot);
 	winx_command_register(&cmd_exit);
+	winx_command_register(&cmd_ls);
 	winx_command_register(&cmd_echo);
 	winx_command_register(&cmd_help);
 }
