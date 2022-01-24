@@ -214,12 +214,56 @@ static struct winx_command cmd_exec =
 	.help = "exec FILE [CMDLINE] ...\nExecute a native program.",
 };
 
+/* md */
+static int cmd_md_func(int argc, char** argv)
+{
+	int rc;
+	wchar_t* path = NULL;
+	if (argc < 2)
+		return 0;
+	path = winx_swprintf(L"\\??\\%S", argv[1]);
+	rc = winx_create_directory(path);
+	winx_free(path);
+	return rc;
+}
+
+static struct winx_command cmd_md =
+{
+	.next = 0,
+	.name = "md",
+	.func = cmd_md_func,
+	.help = "md DIR\nCreate a directory.",
+};
+
+/* del */
+static int cmd_del_func(int argc, char** argv)
+{
+	int rc;
+	wchar_t* path = NULL;
+	if (argc < 2)
+		return 0;
+	path = winx_swprintf(L"\\??\\%S", argv[1]);
+	rc = winx_delete_file(path);
+	winx_free(path);
+	return rc;
+}
+
+static struct winx_command cmd_del =
+{
+	.next = 0,
+	.name = "del",
+	.func = cmd_del_func,
+	.help = "del FILE\nDelete a file.",
+};
+
 void
 naoh_cmd_init(void)
 {
 	winx_command_register(&cmd_shutdown);
 	winx_command_register(&cmd_reboot);
 	winx_command_register(&cmd_exit);
+	winx_command_register(&cmd_del);
+	winx_command_register(&cmd_md);
 	winx_command_register(&cmd_ls);
 	winx_command_register(&cmd_echo);
 	winx_command_register(&cmd_exec);
