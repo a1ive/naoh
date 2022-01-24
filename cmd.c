@@ -127,15 +127,14 @@ static int cmd_ls_func(int argc, char** argv)
 	if (argc < 2)
 	{
 		char vol;
-		char vol_size[16];
 		winx_volume_information info;
+		char* suffixes[] = { "B", "KB", "MB", "GB", "TB", "PB" };
 		for (vol = 'A'; vol <= 'Z'; vol++)
 		{
 			if (winx_get_volume_information(vol, &info))
 				continue;
-			if (winx_bytes_to_hr(info.total_bytes, 2, vol_size, sizeof(vol_size)) <= 0)
-				memcpy(vol_size, "UNKNOWN", sizeof("UNKNOWN"));
-			winx_printf("%c:\\ LABEL=[%S] FS=%s SIZE=%s\n", vol, info.label, info.fs_name, vol_size);
+			winx_printf("%c:\\ LABEL=[%S] FS=%s SIZE=%s\n",
+				vol, info.label, info.fs_name, winx_get_human_size(info.total_bytes, suffixes, 1024));
 		}
 		return 0;
 	}

@@ -433,8 +433,8 @@ int winx_patfind(wchar_t *string,winx_patlist *patterns);
 int winx_patcmp(wchar_t *string,winx_patlist *patterns);
 void winx_patfree(winx_patlist *patterns);
 
-int winx_bytes_to_hr(ULONGLONG bytes, int digits, char *buffer, int length);
-ULONGLONG winx_hr_to_bytes(char *string);
+const char*
+winx_get_human_size(unsigned long long size, const char* human_sizes[6], unsigned long long base);
 
 void winx_to_utf8(char *dst,int size,wchar_t *src);
 

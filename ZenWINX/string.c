@@ -638,94 +638,32 @@ void winx_patfree(winx_patlist *patterns)
 * End of the lightweight alternative for regular expressions.
 */
 
-/**
- * @brief Converts number of bytes
- * to a human readable string.
- * @param[in] bytes number of bytes.
- * @param[in] digits number of digits after the dot.
- * @param[out] buffer the output buffer.
- * @param[in] length length of the buffer, in characters.
- * @return Number of characters stored, not counting the 
- * terminal zero. If number of characters required to store
- * the data exceeds length, then length characters are stored
- * in the buffer and a negative value is returned.
- */
-int winx_bytes_to_hr(ULONGLONG bytes, int digits, char *buffer, int length)
+const char*
+winx_get_human_size(unsigned long long size, const char* human_sizes[6], unsigned long long base)
 {
-    char *suffixes[] = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
-    ULONGLONG n; /* integer part */
-    ULONGLONG m; /* multiplier */
-    ULONGLONG r; /* remaining part */
-    int i;       /* index for the suffixes array */
-    double rd;
-    char spec[] = "%I64u.%00I64u %s";
-    int result;
-    
-    DbgCheck3(digits >= 0, buffer != NULL, length > 0, -1);
+    unsigned long long fsize = size, frac = 0;
+    unsigned units = 0;
+    static char buf[48];
+    const char* umsg;
 
-    for(n = bytes, m = 1, i = 0; n >> 10; n >>= 10, m <<= 10, i++){}
-    r = bytes - n * m;
-    
-    rd = (double)r / (double)m;
-    if(rd >= 1) rd = 0.999999999999999;
-    rd *= pow(10, digits);
-    r = (ULONGLONG)rd;
-    
-    if(digits == 0){
-        result = _snprintf(buffer, length - 1, "%I64u %s", n, suffixes[i]);
-    } else {
-        spec[7] = '0' + digits / 10;
-        spec[8] = '0' + digits % 10;
-        result = _snprintf(buffer, length - 1, spec, n, r, suffixes[i]);
-    }
-    return result;
-}
-
-/**
- * @brief Converts a human readable
- * string to number of bytes.
- * @details Supported suffixes:
- * B, KB, MB, GB, TB, PB, EB, ZB, YB.
- * @param[in] string the string to be converted.
- * @return Number of bytes.
- * @note Accepted values are below 16.0 Eb,
- * all values above will get converted improperly.
- */
-ULONGLONG winx_hr_to_bytes(char *string)
-{
-    char *suffixes[] = { "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
-    int suffix_found = 0;
-    char *dp;        /* dot position */
-    ULONGLONG n;     /* integer part */
-    ULONGLONG m;     /* multiplier */
-    ULONGLONG r = 0; /* remaining part */
-    int i;           /* index for the suffixes array */
-    int z;           /* number of zeros after the dot */
-    double rd;
-    
-    DbgCheck1(string, 0);
-
-    n = (ULONGLONG)_atoi64(string);
-
-    for(i = 0, m = 1024; i < sizeof(suffixes) / sizeof(char *); i++, m <<= 10){
-        if(winx_stristr(string,suffixes[i])){
-            suffix_found = 1;
-            break;
-        }
-    }
-    if(suffix_found == 0){
-        return n;
+    while (fsize >= base && units < 5)
+    {
+        frac = fsize % base;
+        fsize = fsize / base;
+        units++;
     }
 
-    dp = strchr(string, '.');
-    if(dp != NULL){
-        for(z = 0; dp[z + 1] == '0'; z++) {}
-        for(rd = (double)_atoi64(dp + 1); rd > 1; rd /= 10){}
-        /* conversion to LONGLONG is needed for MinGW */
-        r = (ULONGLONG)(LONGLONG)((double)(LONGLONG)m * rd * pow(10, -z));
+    umsg = human_sizes[units];
+
+    if (units)
+    {
+        if (frac)
+            frac = frac * 100 / base;
+        _snprintf(buf, sizeof(buf), "%llu.%02llu%s", fsize, frac, umsg);
     }
-    
-    return n * m + r;
+    else
+        _snprintf(buf, sizeof(buf), "%llu%s", size, umsg);
+    return buf;
 }
 
 /**
