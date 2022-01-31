@@ -255,12 +255,43 @@ static struct winx_command cmd_del =
 	.help = "del FILE\nDelete a file.",
 };
 
+/* mount */
+static int cmd_mount_func(int argc, char** argv)
+{
+	int i, status;
+	wchar_t letter = 0;
+	wchar_t* path = NULL;
+	if (argc < 2)
+		return 0;
+	for (i = 0; i < argc; i++)
+	{
+		if (strncmp(argv[i], "-d=", 3) == 0)
+			letter = argv[i][3];
+		else
+			path = winx_swprintf(L"\\??\\%S", argv[i]);
+	}
+	if (!path)
+		return -1;
+	status = naoh_imdisk_mount(path, letter);
+	winx_free(path);
+	return status;
+}
+
+static struct winx_command cmd_mount =
+{
+	.next = 0,
+	.name = "mount",
+	.func = cmd_mount_func,
+	.help = "mount [-d=X] FILE\nMount ISO|IMG file.",
+};
+
 void
 naoh_cmd_init(void)
 {
 	winx_command_register(&cmd_shutdown);
 	winx_command_register(&cmd_reboot);
 	winx_command_register(&cmd_exit);
+	winx_command_register(&cmd_mount);
 	winx_command_register(&cmd_del);
 	winx_command_register(&cmd_md);
 	winx_command_register(&cmd_ls);
